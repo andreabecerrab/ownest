@@ -7,8 +7,8 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  // Keep this prefix aligned with react-router.config.ts's basename.
-  base: "/ownest",
+  // The trailing slash is required so static asset URLs become /ownest/assets/...
+  base: "/ownest/",
 });
 
 
