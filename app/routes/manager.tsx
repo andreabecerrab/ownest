@@ -1,4 +1,5 @@
 import { useNotificationSocket } from "../components/notification-socket";
+import { HomeButton } from "../components/home-button";
 
 export default function Manager() {
   const { isConfigured, isConnected, sendNotification } =
@@ -26,6 +27,7 @@ export default function Manager() {
 
   return (
     <section className="flex min-h-screen bg-slate-950 px-6 py-16 text-white">
+      <HomeButton />
       <div className="w-full max-w-2xl rounded-3xl p-8 shadow-2xl shadow-black/30 sm:p-12">
         <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
           Manager
