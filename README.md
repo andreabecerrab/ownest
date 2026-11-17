@@ -44,6 +44,19 @@ npm run build
 
 ## Deployment
 
+### GitHub Pages and notifications
+
+GitHub Pages hosts the static frontend only; it cannot run the notification WebSocket server. For local development, `npm run dev` starts that server on port `3001`, and the frontend connects to `ws://localhost:3001` automatically.
+
+To enable notifications on the deployed site:
+
+1. Deploy `server/websocket.js` to a host that supports persistent WebSocket connections and TLS.
+2. In **Settings → Secrets and variables → Actions → Variables** for this repository, add `VITE_NOTIFICATION_URL` with the server's secure WebSocket URL (for example, `wss://your-notification-host.example`).
+3. If your frontend uses a different origin from `https://andreabecerrab.github.io`, configure `ALLOWED_ORIGINS` on the WebSocket server with the allowed site origin(s), comma-separated.
+4. Re-run the **Deploy React App** workflow so the frontend build receives `VITE_NOTIFICATION_URL`.
+
+The WebSocket URL is public configuration, not a secret. Do not put credentials in `VITE_*` variables because they are embedded in the frontend bundle.
+
 ### Docker Deployment
 
 To build and run using Docker:

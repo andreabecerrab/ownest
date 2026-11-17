@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "react-router build",
-    "dev": "concurrently --names app,notifications --prefix-colors cyan,green \"react-router dev\" \"node server/websocket.js\"",
-    "start": "concurrently --names app,notifications --prefix-colors cyan,green \"react-router-serve ./build/server/index.js\" \"node server/websocket.js\"",
+    "dev": "concurrently --names app,notifications --prefix-colors cyan,green \"react-router dev\" \"node --env-file-if-exists=.env server/websocket.js\"",
+    "start": "concurrently --names app,notifications --prefix-colors cyan,green \"react-router-serve ./build/server/index.js\" \"node --env-file-if-exists=.env server/websocket.js\"",
     "typecheck": "react-router typegen && tsc"
   },
   "homepage": "https://andreabecerrab.github.io/ownest",

@@ -1,7 +1,8 @@
 import { useNotificationSocket } from "../components/notification-socket";
 
 export default function Manager() {
-  const { isConnected, sendNotification } = useNotificationSocket();
+  const { isConfigured, isConnected, sendNotification } =
+    useNotificationSocket();
   const notifications = [
     {
       label: "Notification",
@@ -30,7 +31,11 @@ export default function Manager() {
           Manager
         </h1>
         <p className="mt-5 text-sm text-slate-300" role="status">
-          {isConnected ? "Connected" : "Connecting to notifications…"}
+          {isConnected
+            ? "Connected"
+            : isConfigured
+              ? "Connecting to notifications…"
+              : "Notifications endpoint is not configured."}
         </p>
         <div className="mt-4 flex flex-col gap-4 rounded-2xl p-5">
           {notifications.map((notification) => (

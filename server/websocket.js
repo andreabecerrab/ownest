@@ -1,15 +1,28 @@
 import { WebSocketServer, WebSocket } from "ws";
 
 const port = Number(process.env.NOTIFICATION_PORT ?? 3001);
+const allowedOrigins = new Set(
+  [
+    "https://andreabecerrab.github.io",
+    ...(process.env.ALLOWED_ORIGINS ?? "").split(","),
+  ]
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .map((origin) => new URL(origin).origin),
+);
+
 const webSocketServer = new WebSocketServer({
   port,
   verifyClient: ({ origin, req }) => {
-    if (!origin || !req.headers.host) return false;
+    if (!origin) return false;
 
     try {
-      const originHost = new URL(origin).hostname;
-      const requestHost = new URL(`http://${req.headers.host}`).hostname;
-      return originHost === requestHost;
+      const parsedOrigin = new URL(origin);
+      if (allowedOrigins.has(parsedOrigin.origin)) return true;
+
+      return ["localhost", "127.0.0.1", "::1", "[::1]"].includes(
+        parsedOrigin.hostname,
+      );
     } catch {
       return false;
     }
@@ -17,7 +30,7 @@ const webSocketServer = new WebSocketServer({
 });
 
 webSocketServer.on("listening", () => {
-  console.log(`Notification WebSocket listening on ws://localhost:${port}`);
+  console.log(`Notification WebSocket listening on port ${port}`);
 });
 
 webSocketServer.on("error", (error) => {

@@ -5,11 +5,33 @@ export type OwnestNotification = {
   text: string;
 };
 
+function getNotificationSocketUrl() {
+  const configuredUrl = import.meta.env.VITE_NOTIFICATION_URL?.trim();
+  if (configuredUrl) {
+    try {
+      const url = new URL(configuredUrl);
+      return url.protocol === "ws:" || url.protocol === "wss:"
+        ? url.toString()
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  if (["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    return `${protocol}//${window.location.hostname}:3001`;
+  }
+
+  return null;
+}
+
 export function useNotificationSocket(
   onNotification?: (notification: OwnestNotification) => void,
 ) {
   const socketRef = useRef<WebSocket | null>(null);
   const onNotificationRef = useRef(onNotification);
+  const [isConfigured, setIsConfigured] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
@@ -19,12 +41,13 @@ export function useNotificationSocket(
   useEffect(() => {
     let disposed = false;
     let reconnectTimeout: number | undefined;
+    const socketUrl = getNotificationSocketUrl();
+
+    setIsConfigured(socketUrl !== null);
+    if (!socketUrl) return;
 
     const connect = () => {
-      const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-      const socket = new WebSocket(
-        `${protocol}//${window.location.hostname}:3001`,
-      );
+      const socket = new WebSocket(socketUrl);
       socketRef.current = socket;
       socket.onopen = () => setIsConnected(true);
       socket.onclose = () => {
@@ -68,6 +91,7 @@ export function useNotificationSocket(
   }, []);
 
   return {
+    isConfigured,
     isConnected,
     sendNotification: useCallback((notification: OwnestNotification) => {
       const socket = socketRef.current;
