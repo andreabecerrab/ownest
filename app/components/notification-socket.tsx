@@ -1,35 +1,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
+import { supabase } from "../../supabaseClient";
 
 export type OwnestNotification = {
   title: string;
   text: string;
 };
 
-function getNotificationSocketUrl() {
-  const configuredUrl = import.meta.env.VITE_NOTIFICATION_URL?.trim();
-  if (configuredUrl) {
-    try {
-      const url = new URL(configuredUrl);
-      return url.protocol === "ws:" || url.protocol === "wss:"
-        ? url.toString()
-        : null;
-    } catch {
-      return null;
-    }
-  }
-
-  if (["localhost", "127.0.0.1", "::1"].includes(window.location.hostname)) {
-    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    return `${protocol}//${window.location.hostname}:3001`;
-  }
-
-  return null;
+function isNotification(value: unknown): value is OwnestNotification {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "title" in value &&
+    "text" in value &&
+    typeof value.title === "string" &&
+    typeof value.text === "string"
+  );
 }
 
-export function useNotificationSocket(
+export function useNotificationRealtime(
   onNotification?: (notification: OwnestNotification) => void,
 ) {
-  const socketRef = useRef<WebSocket | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
   const onNotificationRef = useRef(onNotification);
   const [isConfigured, setIsConfigured] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -40,63 +32,46 @@ export function useNotificationSocket(
 
   useEffect(() => {
     let disposed = false;
-    let reconnectTimeout: number | undefined;
-    const socketUrl = getNotificationSocketUrl();
+    setIsConfigured(supabase !== null);
+    if (!supabase) return;
 
-    setIsConfigured(socketUrl !== null);
-    if (!socketUrl) return;
-
-    const connect = () => {
-      const socket = new WebSocket(socketUrl);
-      socketRef.current = socket;
-      socket.onopen = () => setIsConnected(true);
-      socket.onclose = () => {
-        setIsConnected(false);
-        if (socketRef.current === socket) socketRef.current = null;
-        if (!disposed) reconnectTimeout = window.setTimeout(connect, 1000);
-      };
-      socket.onerror = () => socket.close();
-      socket.onmessage = (event) => {
-        try {
-          const value: unknown = JSON.parse(event.data);
-          if (
-            typeof value === "object" &&
-            value !== null &&
-            "title" in value &&
-            "text" in value &&
-            typeof value.title === "string" &&
-            typeof value.text === "string"
-          ) {
-            onNotificationRef.current?.({
-              title: value.title,
-              text: value.text,
-            });
-          }
-        } catch {
-          // Ignore malformed socket messages.
+    const channel = supabase
+      .channel("ownest-notifications", {
+        config: { broadcast: { self: false } },
+      })
+      .on("broadcast", { event: "notification" }, ({ payload }) => {
+        if (isNotification(payload)) {
+          onNotificationRef.current?.(payload);
         }
-      };
-    };
+      });
 
-    connect();
+    channelRef.current = channel;
+    channel.subscribe((status) => {
+      if (!disposed) setIsConnected(status === "SUBSCRIBED");
+    });
 
     return () => {
       disposed = true;
-      if (reconnectTimeout !== undefined) {
-        window.clearTimeout(reconnectTimeout);
-      }
-      socketRef.current?.close();
-      socketRef.current = null;
+      if (channelRef.current === channel) channelRef.current = null;
+      void supabase.removeChannel(channel);
     };
   }, []);
 
   return {
     isConfigured,
     isConnected,
-    sendNotification: useCallback((notification: OwnestNotification) => {
-      const socket = socketRef.current;
-      if (socket?.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify(notification));
+    sendNotification: useCallback(async (notification: OwnestNotification) => {
+      const channel = channelRef.current;
+      if (!channel || !supabase) return;
+
+      const result = await channel.send({
+        type: "broadcast",
+        event: "notification",
+        payload: notification,
+      });
+
+      if (result !== "ok") {
+        console.error("Unable to send notification:", result);
       }
     }, []),
   };

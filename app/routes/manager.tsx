@@ -1,9 +1,9 @@
-import { useNotificationSocket } from "../components/notification-socket";
+import { useNotificationRealtime } from "../components/notification-socket";
 import { HomeButton } from "../components/home-button";
 
 export default function Manager() {
   const { isConfigured, isConnected, sendNotification } =
-    useNotificationSocket();
+    useNotificationRealtime();
   const notifications = [
     {
       label: "Notification",
@@ -37,7 +37,7 @@ export default function Manager() {
             ? "Connected"
             : isConfigured
               ? "Connecting to notifications…"
-              : "Notifications endpoint is not configured."}
+              : "Supabase Realtime is not configured."}
         </p>
         <div className="mt-4 flex flex-col gap-4 rounded-2xl p-5">
           {notifications.map((notification) => (

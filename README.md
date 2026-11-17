@@ -42,22 +42,23 @@ Create a production build:
 npm run build
 ```
 
-The production build includes the installable PWA manifest and service worker. Open the deployed site over HTTPS (or the local production preview), then use the browser's **Install app** / **Add to Home Screen** option. The service worker caches the app shell and static assets for offline loading; live notifications still require the separately hosted WebSocket server.
+The production build includes the installable PWA manifest and service worker. Open the deployed site over HTTPS (or the local production preview), then use the browser's **Install app** / **Add to Home Screen** option. The service worker caches the app shell and static assets for offline loading; notification broadcasts require an internet connection and a configured Supabase project.
 
 ## Deployment
 
-### GitHub Pages and notifications
+### Supabase Realtime notifications
 
-GitHub Pages hosts the static frontend only; it cannot run the notification WebSocket server. For local development, `npm run dev` starts that server on port `3001`, and the frontend connects to `ws://localhost:3001` automatically.
+Notifications use Supabase Realtime Broadcast; a separate WebSocket server is not needed. Copy `.env.example` to `.env`, then fill in `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` from **Supabase Dashboard → Project Settings → API**. The project URL must be an HTTPS API URL such as `https://<project-ref>.supabase.co`, not a database connection string.
 
-To enable notifications on the deployed site:
+For GitHub Pages, configure the repository's Actions settings:
 
-1. Deploy `server/websocket.js` to a host that supports persistent WebSocket connections and TLS.
-2. In **Settings → Secrets and variables → Actions → Variables** for this repository, add `VITE_NOTIFICATION_URL` with the server's secure WebSocket URL (for example, `wss://your-notification-host.example`).
-3. If your frontend uses a different origin from `https://andreabecerrab.github.io`, configure `ALLOWED_ORIGINS` on the WebSocket server with the allowed site origin(s), comma-separated.
-4. Re-run the **Deploy React App** workflow so the frontend build receives `VITE_NOTIFICATION_URL`.
+1. Add the Actions variable `VITE_SUPABASE_URL`.
+2. Add the Actions secret `VITE_SUPABASE_PUBLISHABLE_KEY` (legacy anon/public keys also work if that is what the project provides).
+3. Rerun the **Deploy React App** workflow so the values are embedded into the static build.
 
-The WebSocket URL is public configuration, not a secret. Do not put credentials in `VITE_*` variables because they are embedded in the frontend bundle.
+The publishable/anon key is intended for browser use. Never put a Supabase `service_role` or secret key in a `VITE_*` variable. The current `.env` values must be replaced with the matching Supabase project URL and publishable key. If the database credential previously placed there is real or was committed, rotate it in its original database provider and remove it from Git history as appropriate.
+
+Realtime public broadcast channels are used for notifications, so messages should be treated as public to anyone who can connect to this channel. Add Supabase Realtime Broadcast authorization policies and use private channels/authentication if notifications contain private data.
 
 ### Docker Deployment
 

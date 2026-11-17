@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  useNotificationSocket,
+  useNotificationRealtime,
   type OwnestNotification,
 } from "./notification-socket";
 
@@ -8,7 +8,7 @@ export function NotificationListener() {
   const [notification, setNotification] =
     useState<OwnestNotification | null>(null);
 
-  useNotificationSocket((message) => setNotification(message));
+  useNotificationRealtime((message) => setNotification(message));
 
   useEffect(() => {
     if (!notification) return;
