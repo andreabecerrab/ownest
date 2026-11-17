@@ -32,10 +32,11 @@ export function useNotificationRealtime(
 
   useEffect(() => {
     let disposed = false;
-    setIsConfigured(supabase !== null);
-    if (!supabase) return;
+    const client = supabase;
+    setIsConfigured(client !== null);
+    if (!client) return;
 
-    const channel = supabase
+    const channel = client
       .channel("ownest-notifications", {
         config: { broadcast: { self: false } },
       })
@@ -53,7 +54,7 @@ export function useNotificationRealtime(
     return () => {
       disposed = true;
       if (channelRef.current === channel) channelRef.current = null;
-      void supabase.removeChannel(channel);
+      void client.removeChannel(channel);
     };
   }, []);
 
