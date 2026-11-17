@@ -13,7 +13,7 @@ export default defineConfig({
       strategies: "generateSW",
       injectRegister: false,
       registerType: "autoUpdate",
-      includeAssets: ["ownest.svg", "pwa-icon.svg"],
+      includeAssets: ["ownest.svg", "ownest.svg"],
       // The public manifest is served in both dev and production builds.
       manifest: false,
       workbox: {
