@@ -1,0 +1,20 @@
+{
+  "id": "/ownest/",
+  "name": "Ownest",
+  "short_name": "Ownest",
+  "description": "Manage your Ownest car ownership experience.",
+  "start_url": "/ownest/",
+  "scope": "/ownest/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#020617",
+  "background_color": "#020617",
+  "icons": [
+    {
+      "src": "pwa-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -42,6 +42,8 @@ Create a production build:
 npm run build
 ```
 
+The production build includes the installable PWA manifest and service worker. Open the deployed site over HTTPS (or the local production preview), then use the browser's **Install app** / **Add to Home Screen** option. The service worker caches the app shell and static assets for offline loading; live notifications still require the separately hosted WebSocket server.
+
 ## Deployment
 
 ### GitHub Pages and notifications
