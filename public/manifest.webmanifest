@@ -11,7 +11,7 @@
   "background_color": "#020617",
   "icons": [
     {
-      "src": "pwa-icon.svg",
+      "src": "ownest.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
