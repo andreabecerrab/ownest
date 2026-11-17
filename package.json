@@ -8,6 +8,7 @@
     "start": "concurrently --names app,notifications --prefix-colors cyan,green \"react-router-serve ./build/server/index.js\" \"node server/websocket.js\"",
     "typecheck": "react-router typegen && tsc"
   },
+  "homepage": "https://andreabecerrab.github.io/ownest",
   "dependencies": {
     "@primeicons/react": "^8.0.2",
     "@primereact/ui": "^11.2.3",
