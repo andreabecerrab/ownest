@@ -1,7 +1,7 @@
 import type { Config } from "@react-router/dev/config";
 
 export default {
-  // Config options...
-  // Server-side render by default, to enable SPA mode set this to `false`
-  ssr: true,
+  // GitHub Pages serves static files only, so build the app as a client SPA.
+  ssr: false,
+  basename: "/ownest",
 } satisfies Config;

@@ -7,7 +7,8 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
   },
-  base: '/ownest'
+  // Keep this prefix aligned with react-router.config.ts's basename.
+  base: "/ownest",
 });
 
 
